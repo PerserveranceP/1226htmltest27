@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2-이미지 딜레이 슬라이더</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+        .swiper { width: 100%; height: 100vh; }
+
+        .swiper-slide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            position: relative;
+        }
+
+        .swiper-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            user-select: none;
+            -webkit-user-drag: none;
+            opacity: 0; 
+            transition: opacity 1s ease;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+        }
+
+        /* 첫 화면 이미지 1은 바로 보이게 */
+        .swiper-slide:first-child img {
+            opacity: 1;
+        }
+
+        /* 로딩 스피너 */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .guide-text {
+            position: absolute;
+            bottom: 15%;
+            color: white;
+            z-index: 10;
+            font-family: sans-serif;
+            background: rgba(0,0,0,0.4);
+            padding: 8px 16px;
+            border-radius: 30px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="swiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide">
+                <img src="C:\Users\user\Desktop\이벤트\1.png" alt="Image 1">
+                <div class="guide-text">옆으로 밀면 3초 후 다음 사진이 나옵니다 👉</div>
+                <div class="spinner"></div> 
+            </div>
+
+            <div class="swiper-slide">
+                <img src="C:\Users\user\Desktop\이벤트\2.jpg" alt="Image 2">
+                <div class="spinner"></div> 
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper('.swiper', {
+            loop: false,      // 두 번째 이미지에서 멈춤
+            grabCursor: true, 
+            mousewheel: true,
+            speed: 500,       // 슬라이드 넘어가는 속도 (0.5초)
+            on: {
+                slideChangeTransitionStart: function () {
+                    // 넘기기 시작하면 일단 이미지는 숨김 (이미지 1로 돌아갈 때도 적용)
+                    const allImages = document.querySelectorAll('.swiper-slide img');
+                    allImages.forEach((img, index) => {
+                        // 첫 번째 슬라이드로 다시 돌아가는 게 아니라면 일단 다 숨김
+                        img.style.opacity = '0';
+                    });
+                    
+                    const allSpinners = document.querySelectorAll('.spinner');
+                    allSpinners.forEach(s => s.style.opacity = '0');
+                },
+                slideChangeTransitionEnd: function () {
+                    const activeIndex = this.activeIndex;
+                    const activeSlide = this.slides[activeIndex];
+                    const img = activeSlide.querySelector('img');
+                    const spinner = activeSlide.querySelector('.spinner');
+
+                    // 1번 이미지로 다시 돌아왔을 때는 딜레이 없이 바로 보여줌
+                    if (activeIndex === 0) {
+                        img.style.opacity = '1';
+                        return;
+                    }
+
+                    // 2번 이미지(인덱스 1)일 때만 3초 딜레이 적용
+                    if (spinner) spinner.style.opacity = '1';
+
+                    setTimeout(() => {
+                        if (img) img.style.opacity = '1';
+                        if (spinner) spinner.style.opacity = '0';
+                    }, 3000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
